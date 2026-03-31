@@ -28,11 +28,93 @@ const PRODUCTS = [
   { label: "Other Enquiries", dept: "General" },
 ];
 
-const CONSULTANT = {
-  name: "Collins Lumayi",
-  title: "Senior Loan Consultant",
-  phone: "0974002260",
+
+// Department contacts (dummy info)
+const DEPARTMENT_CONTACTS = {
+  "Credit": {
+    name: "Jane Mwansa",
+    title: "Credit Officer",
+    phone: "0977001111",
+    email: "credit@xtenda.com",
+  },
+  "Operations": {
+    name: "Paul Banda",
+    title: "Operations Manager",
+    phone: "0977002222",
+    email: "operations@xtenda.com",
+  },
+  "HR": {
+    name: "Linda Zulu",
+    title: "HR Officer",
+    phone: "0977003333",
+    email: "hr@xtenda.com",
+  },
+  "Customer Service": {
+    name: "Moses Phiri",
+    title: "Customer Service Rep",
+    phone: "0977004444",
+    email: "service@xtenda.com",
+  },
+  "General": {
+    name: "General Desk",
+    title: "Support Team",
+    phone: "0977005555",
+    email: "info@xtenda.com",
+  },
 };
+
+// Sales consultants per branch (dummy info)
+const SALES_CONSULTANTS = {
+  "Lusaka – Mambilima House": [
+    { name: "Collins Lumayi", title: "Loan Consultant", phone: "0974002260" },
+    { name: "Agnes Chanda", title: "Loan Consultant", phone: "0974002261" },
+  ],
+  "Lusaka – Civic Centre": [
+    { name: "John Tembo", title: "Loan Consultant", phone: "0974002262" },
+    { name: "Mary Banda", title: "Loan Consultant", phone: "0974002263" },
+  ],
+  "Lusaka – Ben Bella": [
+    { name: "Peter Zulu", title: "Loan Consultant", phone: "0974002264" },
+  ],
+  "Kitwe": [
+    { name: "Grace Mwape", title: "Loan Consultant", phone: "0974002265" },
+  ],
+  "Ndola": [
+    { name: "Brian Mulenga", title: "Loan Consultant", phone: "0974002266" },
+  ],
+  "Kabwe": [
+    { name: "Natasha Phiri", title: "Loan Consultant", phone: "0974002267" },
+  ],
+  "Livingstone": [
+    { name: "Kelvin Lungu", title: "Loan Consultant", phone: "0974002268" },
+  ],
+  "Chipata": [
+    { name: "Chipo Mumba", title: "Loan Consultant", phone: "0974002269" },
+  ],
+  "Solwezi": [
+    { name: "Felix Mwila", title: "Loan Consultant", phone: "0974002270" },
+  ],
+  "Kasama": [
+    { name: "Esther Mwansa", title: "Loan Consultant", phone: "0974002271" },
+  ],
+  "Mansa": [
+    { name: "Martha Chileshe", title: "Loan Consultant", phone: "0974002272" },
+  ],
+  "Mongu": [
+    { name: "Jackson Simfukwe", title: "Loan Consultant", phone: "0974002273" },
+  ],
+  "Choma": [
+    { name: "Loveness Zulu", title: "Loan Consultant", phone: "0974002274" },
+  ],
+  "Other": [
+    { name: "Xtenda Sales Team", title: "Loan Consultant", phone: "0974002275" },
+  ],
+};
+
+function getRandomConsultant(branch) {
+  const consultants = SALES_CONSULTANTS[branch] || SALES_CONSULTANTS["Other"];
+  return consultants[Math.floor(Math.random() * consultants.length)];
+}
 
 const STEPS = {
   WELCOME: "WELCOME",
@@ -75,13 +157,25 @@ function getBotResponse(step, userInput, context) {
         text: `What would you like assistance with today?`,
         options: PRODUCTS.map((p) => `${p.label} (${p.dept})`),
       };
-    case STEPS.HANDOVER:
+    case STEPS.HANDOVER: {
       const product = PRODUCTS.find(p => userInput.startsWith(p.label));
-      const dept = product?.dept || "our team";
+      const dept = product?.dept || "General";
+      let contact;
+      if (dept === "Sales") {
+        // Pick a random consultant for the selected branch
+        const branch = context.branch || "Other";
+        contact = getRandomConsultant(branch);
+      } else {
+        contact = DEPARTMENT_CONTACTS[dept] || DEPARTMENT_CONTACTS["General"];
+      }
       return {
-        text: `Thank you! 🎉\nYou will now be assisted by:\n\n👤 *${CONSULTANT.name}*\n_${CONSULTANT.title}_\n📞 ${CONSULTANT.phone}\n\nDept routed: *${dept}*\n\nAlternatively, a team member will contact you shortly.`,
+        text:
+          `Thank you! 🎉\nYou will now be assisted by:\n\n👤 *${contact.name}*\n_${contact.title}_\n📞 ${contact.phone}` +
+          (contact.email ? `\n✉️ ${contact.email}` : "") +
+          `\n\nDept routed: *${dept}*\n\nAlternatively, a team member will contact you shortly.`,
         options: ["✅ Got it – Thank you!", "🔄 Start Over"],
       };
+    }
     case STEPS.DONE:
       return {
         text: `Thank you! Your request has been received. ✅\nOur team will contact you shortly.\n\n_Xtenda Finance – Your Financial Partner_ 💚`,
